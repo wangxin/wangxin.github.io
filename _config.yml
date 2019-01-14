@@ -16,9 +16,8 @@
 title: Tips and tricks
 email: wangxin.wang@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
-  During daily work, I sometimes ran into issue and took hours searching
-  answer from internet. When the problem is finally solved, I usually like to take a note.
-  This site is to publish the notes I've taken. Hope they could be useful for someone else too.
+  This site shares the tips and tricks I accumlated during daily work. Hope they could be useful 
+  for someone else too.
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 # twitter_username: jekyllrb
