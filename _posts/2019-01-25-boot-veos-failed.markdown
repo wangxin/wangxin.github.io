@@ -37,7 +37,7 @@ If type `boot falsh:/vEOS.swi` on Aboot shell, then the VM can boot up normally.
 
 The fix for this issue is simple. After the VM is up, run below command:
 ```
-$ echo "SWI=flash:vEOS.swi"
+$ echo "SWI=flash:vEOS.swi" > /mnt/flash/boot-config
 ```
 
 The slash before image name is removed. Then it works. The VMs can always boot up corretly after reboot. I don't know why, but it just works.
