@@ -8,9 +8,7 @@ categories: ansible, automation
 It is very convenient to filter or modify a list using list comprehension in python. The same could be done in ansible playbook. However, the official documentation does not have a explicit guide for these operations.
 
 I found a very good post explained how to do this:
-[How to filter, join and map lists in Ansible](https://www.tailored.cloud/devops/how-to-filter-and-map-lists-in-ansible/)
-
-Examples 
+[How to filter, join and map lists in Ansible](https://www.tailored.cloud/devops/how-to-filter-and-map-lists-in-ansible/) 
 
 ### Filter
 
