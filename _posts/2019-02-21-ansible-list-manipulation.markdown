@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Ansible list manipulation"
-date:   2019-02-21 11:00 +0800
+date:   2019-02-21 11:00:00 +0800
 categories: ansible, automation
 ---
 

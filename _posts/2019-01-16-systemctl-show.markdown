@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Use `systemctl show` to output more formated service status"
-date:   2019-01-16 19:00 +0800
+date:   2019-01-16 19:00:00 +0800
 categories: service, automation
 ---
 

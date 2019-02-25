@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Boot vEOS failed"
-date:   2019-01-25 17:00 +0800
+date:   2019-01-25 17:00:00 +0800
 categories: virtualization
 ---
 
