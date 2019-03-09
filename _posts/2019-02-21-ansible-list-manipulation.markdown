@@ -18,15 +18,19 @@ List of tests we can use:
 * [Jinjia tests](http://jinja.pocoo.org/docs/2.10/templates/#builtin-tests)
 
 Examples
+{% raw %}
 ```
 "{{ a_list_of_string | select('match', '^Start_of_string.*') | list }}"
 "{{ a_list_of_string | select('search', 'subet_of_string') | list }}"
 ```
+{% endraw %}
 
 The `match` and `search` tests are explained in [Ansible tests](https://docs.ansible.com/ansible/latest/user_guide/playbooks_tests.html). `match` requires a regular expression as argument for complete match. `search` only requires matching a subset of the string
 
 ### Map
 The `map` filter is also from Jinjia. It takes one or more arguments. The first argument is name of another filter. A simple example:
+{% raw %}
 ```
 "{{ a_list_of_string | map('upper') | list }}"
 ```
+{% endraw %}
