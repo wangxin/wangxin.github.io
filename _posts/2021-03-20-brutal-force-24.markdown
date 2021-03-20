@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "brutal force calculate 24"
+title:  "24 game brutal force algorithm"
 date:   2021-03-20 10:00:00 +0800
 categories: algorithm
 ---
