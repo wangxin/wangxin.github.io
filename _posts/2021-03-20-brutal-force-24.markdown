@@ -40,22 +40,22 @@ def main(nums):
     for n1, n2, n3, n4 in nums_combinations:
         for s1, s2, s3 in symbols_combinations:
             cal_strs = []
-            cal_strs.append(f'{n1}{s1}{n2}{s2}{n3}{s3}{n4}')
-            cal_strs.append(f'({n1}{s1}{n2}){s2}{n3}{s3}{n4}')
-            cal_strs.append(f'{n1}{s1}({n2}{s2}{n3}){s3}{n4}')
-            cal_strs.append(f'{n1}{s1}{n2}{s2}({n3}{s3}{n4})')
-            cal_strs.append(f'({n1}{s1}{n2}{s2}{n3}){s3}{n4}')
-            cal_strs.append(f'{n1}{s1}({n2}{s2}{n3}{s3}{n4})')
-            cal_strs.append(f'({n1}{s1}{n2}{s2}{n3}){s3}{n4}')
-            cal_strs.append(f'{n1}{s1}({n2}{s2}{n3}{s3}{n4})')
-            cal_strs.append(f'({n1}{s1}{n2}){s2}({n3}{s3}{n4})')
-            cal_strs.append(f'(({n1}{s1}{n2}){s2}{n3}){s3}{n4}')
-            cal_strs.append(f'({n1}{s1}({n2}{s2}{n3})){s3}{n4}')
-            cal_strs.append(f'{n1}{s1}(({n2}{s2}{n3}){s3}{n4})')
-            cal_strs.append(f'{n1}{s1}({n2}{s2}({n3}{s3}{n4}))')
+            cal_strs.append('{n1}{s1}{n2}{s2}{n3}{s3}{n4}'.format(n1=n1, n2=n2, n3=n3, n4=n4, s1=s1, s2=s2, s3=s3))
+            cal_strs.append('({n1}{s1}{n2}){s2}{n3}{s3}{n4}'.format(n1=n1, n2=n2, n3=n3, n4=n4, s1=s1, s2=s2, s3=s3))
+            cal_strs.append('{n1}{s1}({n2}{s2}{n3}){s3}{n4}'.format(n1=n1, n2=n2, n3=n3, n4=n4, s1=s1, s2=s2, s3=s3))
+            cal_strs.append('{n1}{s1}{n2}{s2}({n3}{s3}{n4})'.format(n1=n1, n2=n2, n3=n3, n4=n4, s1=s1, s2=s2, s3=s3))
+            cal_strs.append('({n1}{s1}{n2}{s2}{n3}){s3}{n4}'.format(n1=n1, n2=n2, n3=n3, n4=n4, s1=s1, s2=s2, s3=s3))
+            cal_strs.append('{n1}{s1}({n2}{s2}{n3}{s3}{n4})'.format(n1=n1, n2=n2, n3=n3, n4=n4, s1=s1, s2=s2, s3=s3))
+            cal_strs.append('({n1}{s1}{n2}{s2}{n3}){s3}{n4}'.format(n1=n1, n2=n2, n3=n3, n4=n4, s1=s1, s2=s2, s3=s3))
+            cal_strs.append('{n1}{s1}({n2}{s2}{n3}{s3}{n4})'.format(n1=n1, n2=n2, n3=n3, n4=n4, s1=s1, s2=s2, s3=s3))
+            cal_strs.append('({n1}{s1}{n2}){s2}({n3}{s3}{n4})'.format(n1=n1, n2=n2, n3=n3, n4=n4, s1=s1, s2=s2, s3=s3))
+            cal_strs.append('(({n1}{s1}{n2}){s2}{n3}){s3}{n4}'.format(n1=n1, n2=n2, n3=n3, n4=n4, s1=s1, s2=s2, s3=s3))
+            cal_strs.append('({n1}{s1}({n2}{s2}{n3})){s3}{n4}'.format(n1=n1, n2=n2, n3=n3, n4=n4, s1=s1, s2=s2, s3=s3))
+            cal_strs.append('{n1}{s1}(({n2}{s2}{n3}){s3}{n4})'.format(n1=n1, n2=n2, n3=n3, n4=n4, s1=s1, s2=s2, s3=s3))
+            cal_strs.append('{n1}{s1}({n2}{s2}({n3}{s3}{n4}))'.format(n1=n1, n2=n2, n3=n3, n4=n4, s1=s1, s2=s2, s3=s3))
             for cal_str in cal_strs:
                 try:
-                    if eval(cal_str) == 24:
+                    if 23.999 < eval(cal_str) < 24.001:
                         possible_calculations.append(cal_str)
                 except:
                     pass
