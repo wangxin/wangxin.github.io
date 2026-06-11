@@ -98,9 +98,9 @@ The fix is not "pick one file format for everything." Different kinds of invento
 * **CSV for tabular, relational data** — the device list, and the physical links between devices (which port on which device connects to which port on which other device). This is fundamentally a table. CSV diffs cleanly in git, is editable in Excel by lab operators, and matches how the data already lives in people's heads.
 * **YAML for structured per-device facts** — credentials, ASIC type, role, feature flags, anything that belongs in Ansible `host_vars` / `group_vars`. YAML handles nested and typed data far better than CSV ever will, and it is what Ansible natively consumes.
 
-Both formats serve as source of truth within their own domain. What gets generated from them is the Ansible inventory file itself (hosts, groups, group memberships), `sonic-mgmt` fixtures, the lab dashboard, IP-allocation reports — none of those are written by hand, ever.
+Both formats serve as source of truth within their own domain. What feeds Ansible is a **dynamic inventory script** — an executable that reads the CSV and YAML on every invocation and returns the inventory JSON Ansible expects. Ansible has supported this natively for years; pointing `ansible-playbook -i inventory.py` (or any executable) at it is all the integration needed. No "regenerate after edit" step, no stale committed inventory file, no drift window. The same script (or a small set of renderers around the same loader) also produces `sonic-mgmt` fixtures, the lab dashboard, IP-allocation reports — none of those are written by hand, ever.
 
-The non-negotiable rule, regardless of format: **the source-of-truth files must be the only writable inputs.** Generated files are read-only artifacts, regenerated on every change, and never hand-edited. Without that enforcement, the dual-source mess comes back in a new shape within a release or two.
+The non-negotiable rule, regardless of format: **the source-of-truth files must be the only writable inputs.** Everything Ansible and the test framework consume is computed on demand from them. Without that enforcement, the dual-source mess comes back in a new shape within a release or two.
 
 A useful side benefit of this split: lab operators (who care about cabling) and test engineers (who care about facts) get to work in the format that fits their job, instead of fighting a single oversized schema that tries to serve both.
 
@@ -108,7 +108,7 @@ A useful side benefit of this split: lab operators (who care about cabling) and 
 
 If you collapse the seven items into a single picture, you get something like this:
 
-* CSV holds devices and physical links; YAML holds per-device facts (item 7). Ansible inventory and other downstream artifacts are generated, not hand-edited.
+* CSV holds devices and physical links; YAML holds per-device facts (item 7). An Ansible dynamic inventory script reads both on every invocation; no static inventory file is committed.
 * An allocator service hands out VM names, IPs, and other shared resources from configured pools (item 1).
 * A Python orchestrator (item 4), driving `ansible-runner` underneath via the `AnsibleHost(s)` library (item 6), provisions the testbed.
 * On the host, a small number of OVS bridges with OpenFlow rules (item 2) handle traffic distribution, with first-class observability tooling.
