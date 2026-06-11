@@ -93,17 +93,22 @@ The migration is the hard part. Every test that uses `ansible_adhoc()` eventuall
 
 Today, the same device shows up in both the Ansible inventory files and in `ansible/files/*.csv`. Two sources of truth, no enforcement, guaranteed drift. The downstream failure mode — "this testbed works for most people but fails intermittently for one team" — is exactly the shape you would predict.
 
-What I would do, in order of ambition:
+The fix is not "pick one file format for everything." Different kinds of inventory data want different shapes, and the right answer is to use each format for what it is good at:
 
-* **Minimum:** pick one source of truth. CSV-as-source-of-truth with generated inventory is a strict improvement over the current dual-source state.
-* **Better:** move to a typed YAML or TOML schema (Pydantic-validated) as the source of truth, with multiple renderers — Ansible inventory, `sonic-mgmt` fixtures, lab dashboard, IP allocation report. Now adding a new consumer is "write a renderer," not "write to another file."
-* **Critical, either way:** the source-of-truth file must be the *only* writable input. Generated files are read-only artifacts, regenerated on every change, and never hand-edited. Without that enforcement, the dual-source mess just comes back in a new shape.
+* **CSV for tabular, relational data** — the device list, and the physical links between devices (which port on which device connects to which port on which other device). This is fundamentally a table. CSV diffs cleanly in git, is editable in Excel by lab operators, and matches how the data already lives in people's heads.
+* **YAML for structured per-device facts** — credentials, ASIC type, role, feature flags, anything that belongs in Ansible `host_vars` / `group_vars`. YAML handles nested and typed data far better than CSV ever will, and it is what Ansible natively consumes.
+
+Both formats serve as source of truth within their own domain. What gets generated from them is the Ansible inventory file itself (hosts, groups, group memberships), `sonic-mgmt` fixtures, the lab dashboard, IP-allocation reports — none of those are written by hand, ever.
+
+The non-negotiable rule, regardless of format: **the source-of-truth files must be the only writable inputs.** Generated files are read-only artifacts, regenerated on every change, and never hand-edited. Without that enforcement, the dual-source mess comes back in a new shape within a release or two.
+
+A useful side benefit of this split: lab operators (who care about cabling) and test engineers (who care about facts) get to work in the format that fits their job, instead of fighting a single oversized schema that tries to serve both.
 
 ## What a clean redesign would look like
 
 If you collapse the seven items into a single picture, you get something like this:
 
-* A typed inventory schema (item 7) is the only writable source of truth.
+* CSV holds devices and physical links; YAML holds per-device facts (item 7). Ansible inventory and other downstream artifacts are generated, not hand-edited.
 * An allocator service hands out VM names, IPs, and other shared resources from configured pools (item 1).
 * A Python orchestrator (item 4), driving `ansible-runner` underneath via the `AnsibleHost(s)` library (item 6), provisions the testbed.
 * On the host, a small number of OVS bridges with OpenFlow rules (item 2) handle traffic distribution, with first-class observability tooling.
