@@ -83,11 +83,26 @@ The result is that the test framework keeps inventing workarounds at the layer a
 
 This is the natural pairing with item 5, and the move I would actually invest in.
 
-The right primitive already exists: **`ansible-runner`**, Red Hat's official Python interface to the Ansible execution engine. You build a thin Python wrapper over it — call it `AnsibleHost` and `AnsibleHosts` — that exposes exactly the operations the tests need: per-host call, parallel call across a group, structured results, retries, timeouts, streaming output. Every device abstraction in `sonic-mgmt` (DUT, neighbor, PTF, fanout) sits on top of those two classes.
+The wrong choice — the one I almost recommended in the first draft of this post — is **`ansible-runner`**. It is a subprocess wrapper around `ansible-playbook` designed for AWX/Tower's needs: launch a playbook as a managed job, capture its event stream, hand it to a UI. It is not designed for the workload a test framework actually has — thousands of small ad-hoc calls in tight loops, where per-call overhead matters and you want results as Python objects, not events parsed from stdout.
 
-This buys three things. First, you exit the `pytest-ansible` ceiling and inherit everything `ansible-runner` can do. Second, you make every device interaction a typed Python object, which is much easier to test, mock, and reason about. Third — and this matters more than people realize today — **you make the test framework AI-agent-friendly.** A typed Python API with explicit operations is something a coding agent can read, call, and combine. A plugin-mediated DSL is not. Anyone planning to use AI agents for triage, generation, or repair of network tests should put this on the critical path.
+The right primitive is **Ansible's internal Python API**: `TaskQueueManager`, `InventoryManager`, `VariableManager`, `Play`, `DataLoader`. You build a thin wrapper that exposes typed `AnsibleHost` and `AnsibleHosts` classes (and an `AnsibleLocalhost` for completeness). On top of those, every device abstraction in `sonic-mgmt` — DUT, neighbor, PTF, fanout — becomes a regular Python object.
 
-The migration is the hard part. Every test that uses `ansible_adhoc()` eventually needs updating. But the old plugin and the new library can coexist for as long as needed; you migrate test directories one at a time, behind a feature flag, with the old path staying green throughout.
+What that wrapper looks like in practice:
+
+* `AnsibleHost(inventory, "vlab-01").shell("uptime")` — single-host call, returns a dict of results, raises on failure unless `task_directives={"ignore_errors": True}`.
+* `AnsibleHosts(inventory, "vms_1").ping()` — group call, returns `{hostname: result, ...}` keyed by host. Forking is `TaskQueueManager`'s native concern, not the framework's.
+* Dynamic dispatch via `__getattr__` so any Ansible module is callable as a method — same ergonomics as `pytest-ansible`, no plugin in between.
+* A context manager for batch mode: `with host: host.shell(...); host.copy(...)` loads tasks and runs them as a single play on exit, amortizing setup cost.
+* Module name validation at task-build time so typos fail fast instead of deep in the executor.
+* Caller-frame logging so every log line shows the test `file:line` that originated it.
+
+I built a working version of this on a side branch — [`ansible_hosts.py`](https://github.com/wangxin/sonic-mgmt/blob/tbng/ansible/testbed/base/ansible_hosts.py) on the `tbng` branch of my `sonic-mgmt` fork. It is roughly 800 lines, which is itself evidence the abstraction is right-sized. The code is rough in places (mutable default arguments, a context-manager bug I have already spotted, per-host inventory reparsing that should be cached), but the shape is correct and it runs.
+
+This buys three things. First, you exit the `pytest-ansible` ceiling and inherit everything Ansible's executor can do — real forking, real timeouts, real structured results. Second, every device interaction becomes a typed Python object, which is dramatically easier to test, mock, refactor, and reason about. Third — and this matters more than people realize today — **you make the test framework AI-agent-friendly.** A typed Python API with explicit operations is something a coding agent can read, call, and combine. A plugin-mediated DSL inside YAML inside `pytest` is not. Anyone planning to use AI agents for triage, generation, or repair of network tests should put this on the critical path.
+
+The honest cost: Ansible's internal API is not a stable public API. Red Hat steers people to `ansible-runner` precisely so they can change internals freely. If you take this path, you accept the maintenance burden: pin to a known ansible-core version range, run a CI matrix across the range you support, treat ansible-core upgrades as their own work item with their own validation. For an in-house test framework that already pins its dependencies tightly, this is an acceptable trade.
+
+The migration is the other hard part. Every test that uses `ansible_adhoc()` eventually needs updating. But the old plugin and the new library can coexist for as long as needed; you migrate test directories one at a time, behind a feature flag, with the old path staying green throughout.
 
 ## 7. One source of truth for testbed inventory
 
