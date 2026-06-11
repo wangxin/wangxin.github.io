@@ -29,20 +29,18 @@ Today, neighbor VMs and their IP addresses are hand-written into a huge Ansible 
 
 Why it hurts: every new testbed is a manual operation; merges between branches collide on the same lines; mass edits (renumbering a subnet, retiring a VM pool) require ad-hoc scripts; IP collisions show up as weeks of intermittent test failures.
 
-What I would do: replace the file with a declarative spec — "I need a T0 topology with 32 leaf neighbors on this server, behind this management subnet" — and let an allocator pick VM names and IPs from a pool, recording the leases back to disk. The right primitive is a typed inventory schema (Pydantic, JSON Schema) so violations fail at load time, not at deploy time.
+What I would do: replace the file with a declarative spec — "this testbed runs a T0 topology on this server, with these DUTs" — and let an allocator pick neighbor VM names and IPs from a pool, recording the leases back to disk. The topology definition itself already says how many neighbors are needed and what role each plays; the spec should not repeat that. The right primitive is a typed inventory schema (Pydantic, JSON Schema) so violations fail at load time, not at deploy time.
 
 A spec might look like this:
 
 ```yaml
 testbed: tb-east-7
 server: vmhost-east-7
-dut:
-  device: str-msn2700-01
-  topology: t0
+topology: t0            # implies neighbor count, roles, and wiring
+duts:                   # a testbed may host one or more DUTs
+  - str-msn2700-01
 neighbors:
-  type: veos
-  count: 32          # allocator picks names and IPs from the pool
-mgmt_subnet: auto    # allocator picks from the configured pool
+  type: veos            # allocator picks names and IPs from the pool
 ```
 
 The constraint is backwards compatibility. Realistically the old format and the new one have to coexist for at least one release cycle, with a one-way converter so existing testbeds keep working while new ones move over.
