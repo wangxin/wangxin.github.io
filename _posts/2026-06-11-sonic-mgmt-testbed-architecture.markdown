@@ -123,5 +123,3 @@ That is why these debts accumulate — not because the engineers inside the proj
 ## Closing
 
 If you are working on test infrastructure for SONiC, or for any fast-growing networking OSS project, I would genuinely like to hear how you think about these tradeoffs. Where do you agree, where am I wrong, what has your team tried? You can reach me on [LinkedIn](https://www.linkedin.com/in/wangxinwang/).
-
-If anything here is useful enough to act on, I would rather see it discussed in the SONiC test working group than left as a blog post. Treat this as an invitation.
